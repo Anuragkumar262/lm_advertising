@@ -1,7 +1,7 @@
 const Home = ()=>{
     return(
     <>
-    <h1 className="text-white">Landing</h1>
+    <h1 style={{ color: "var(--text-primary)" }}>Landing</h1>
     </>
     )
 }

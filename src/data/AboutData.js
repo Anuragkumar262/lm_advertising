@@ -40,5 +40,12 @@ const IMAGES = [
   },
 ];
 
+const CEO_PROFILE = {
+  name: "Mr. Abhishek Arya",
+  role: "Founder & CEO, LM Advertising",
+  image: "",
+  message:
+    "At LM Advertising, we turn brand ambition into visible growth. Our focus is clear strategy, consistent creative quality, and execution that builds long-term trust with every campaign.",
+};
 
-export {PARAGRAPHS,IMAGES};
+export {PARAGRAPHS,IMAGES,CEO_PROFILE};

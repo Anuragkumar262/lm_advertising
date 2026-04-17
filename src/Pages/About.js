@@ -1,591 +1,406 @@
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useScroll } from "framer-motion";
+import { useOutletContext } from "react-router";
 import STATS from "../data/stats";
-import { PARAGRAPHS,IMAGES } from "../data/AboutData";
+import { IMAGES, PARAGRAPHS ,CEO_PROFILE} from "../data/AboutData";
 
-// ─── Scroll-reveal hook ───────────────────────────────────────────────────────
-function useInView(options = {}) {
-  const ref = useRef(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15, ...options }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return [ref, inView];
-}
-
-// ─── Scroll-progress hook (0 → 1 while element is in viewport) ───────────────
-function useScrollProgress() {
-  const ref = useRef(null);
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const onScroll = () => {
-      const rect = el.getBoundingClientRect();
-      const winH = window.innerHeight;
-      // 0 when top of el hits bottom of viewport, 1 when bottom of el hits top
-      const raw = 1 - rect.bottom / (winH + rect.height);
-      setProgress(Math.min(1, Math.max(0, raw)));
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return [ref, progress];
-}
+const STEPS = PARAGRAPHS.map((item, index) => ({
+  ...item,
+  image: IMAGES[index % IMAGES.length],
+}));
 
 
-// ─── Animated counter ─────────────────────────────────────────────────────────
-function AnimatedStat({ value, label, inView }) {
-  return (
-    <div
-      style={{
-        transition: "opacity 0.7s ease, transform 0.7s ease",
-        opacity: inView ? 1 : 0,
-        transform: inView ? "translateY(0)" : "translateY(24px)",
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "'Syne', sans-serif",
-          fontSize: "clamp(2rem, 4vw, 2.75rem)",
-          fontWeight: 800,
-          color: "#E8192C",
-          lineHeight: 1,
-          letterSpacing: "-1px",
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          fontSize: "12px",
-          fontWeight: 500,
-          color: "rgba(255,255,255,0.4)",
-          textTransform: "uppercase",
-          letterSpacing: "2px",
-          marginTop: "6px",
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 const About = () => {
-  const [sectionRef, progress] = useScrollProgress();
-  const [headerRef, headerInView] = useInView();
-  const [statsRef, statsInView] = useInView();
+  const outletContext = useOutletContext();
+  const theme = outletContext?.theme ?? "light";
+  const isDark = theme === "dark";
+  const sectionRef = useRef(null);
   const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < 1024 : false
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
   );
-  const [isShortViewport, setIsShortViewport] = useState(() =>
-    typeof window !== "undefined" ? window.innerHeight < 820 : false
-  );
+  const [activeStep, setActiveStep] = useState(0);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
 
   useEffect(() => {
-    const onResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-      setIsShortViewport(window.innerHeight < 820);
-    };
+    const onResize = () => setIsMobile(window.innerWidth < 768);
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-  const isCompactDesktop = !isMobile && isShortViewport;
 
-  // Which image to show (0–3) based on scroll progress across the section
-  const activeImg = isMobile
-    ? 0
-    : Math.min(IMAGES.length - 1, Math.floor(progress * IMAGES.length));
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (value) => {
+      const nextStep = Math.min(
+        STEPS.length - 1,
+        Math.floor(value * STEPS.length)
+      );
+      setActiveStep(nextStep);
+    });
 
-  // Which paragraph to highlight
-  const activePara = isMobile
-    ? PARAGRAPHS.length - 1
-    : Math.min(PARAGRAPHS.length - 1, Math.floor(progress * PARAGRAPHS.length));
+    return () => unsubscribe();
+  }, [scrollYProgress]);
 
   return (
     <>
-      {/* Google Fonts */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
-
-        .about-img-slide {
-          position: absolute;
-          inset: 0;
-          transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1);
-        }
-        .about-img-slide.active {
-          opacity: 1;
-          transform: scale(1);
-          z-index: 2;
-        }
-        .about-img-slide.inactive {
-          opacity: 0;
-          transform: scale(1.04);
-          z-index: 1;
-        }
-
-        .para-block {
-          transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        .para-block.active {
-          opacity: 1;
-          transform: translateX(0);
-        }
-        .para-block.inactive {
-          opacity: 0.22;
-          transform: translateX(-8px);
-        }
-
-        .lm-cta {
-          position: relative;
-          overflow: hidden;
-          background: #E8192C;
-          color: #fff;
-          border: none;
-          padding: 14px 36px;
-          border-radius: 100px;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: 0.5px;
-          cursor: pointer;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .lm-cta::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: rgba(255,255,255,0.15);
-          opacity: 0;
-          transition: opacity 0.2s ease;
-        }
-        .lm-cta:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 40px rgba(232,25,44,0.45);
-        }
-        .lm-cta:hover::after { opacity: 1; }
-        .lm-cta:active { transform: translateY(0); }
-
-        .img-dot {
-          width: 6px; height: 6px;
-          border-radius: 50%;
-          background: rgba(255,255,255,0.2);
-          transition: all 0.3s ease;
-          cursor: default;
-        }
-        .img-dot.active {
-          width: 20px;
-          border-radius: 3px;
-          background: #E8192C;
-        }
-
-        .eyebrow-line {
-          display: inline-block;
-          width: 24px;
-          height: 1.5px;
-          background: #E8192C;
-          margin-right: 10px;
-          vertical-align: middle;
-          margin-bottom: 2px;
-        }
-
-        .noise-overlay {
-          position: absolute;
-          inset: 0;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-          pointer-events: none;
-          z-index: 10;
-          border-radius: inherit;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
       `}</style>
 
-      {/*
-        ── STICKY SCROLL SECTION ──────────────────────────────────────────────
-        The section is tall (400vh) to create scroll real estate.
-        The inner content is sticky so it stays in view while user scrolls.
-      */}
       <section
         ref={sectionRef}
         style={{
           position: "relative",
-          height: isMobile ? "auto" : "400vh",
-          minHeight: isMobile ? "100vh" : "auto",
-          background: "#0A0A0A",
+          height: `${Math.max(STEPS.length * 100, 260)}vh`,
+          background: isDark ? "#0f1014" : "#f4f5f8",
         }}
       >
-        {/* Sticky wrapper */}
         <div
           style={{
-            position: isMobile ? "relative" : "sticky",
-            top: isMobile ? "auto" : 0,
-            height: isMobile ? "auto" : "100vh",
-            overflow: isMobile ? "visible" : "hidden",
-            display: "flex",
-            flexDirection: "column",
-
+            position: "sticky",
+            top: 0,
+            height: "100svh",
+            width: "100%",
+            overflow: "hidden",
           }}
         >
-          {/* Ambient glow */}
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={STEPS[activeStep].image.src}
+              src={STEPS[activeStep].image.src}
+              alt={STEPS[activeStep].image.label}
+              initial={{ opacity: 0, scale: 1.08 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center",
+              }}
+            />
+          </AnimatePresence>
+
           <div
             style={{
               position: "absolute",
-              top: "-20%",
-              right: "-10%",
-              width: "600px",
-              height: "600px",
-              borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(232,25,44,0.12) 0%, transparent 70%)",
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-20%",
-              left: "-10%",
-              width: "500px",
-              height: "500px",
-              borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(232,25,44,0.07) 0%, transparent 70%)",
-              pointerEvents: "none",
+              inset: 0,
+              background:
+                isDark
+                  ? "linear-gradient(180deg, rgba(8,10,16,0.45) 0%, rgba(8,10,16,0.3) 42%, rgba(8,10,16,0.72) 100%)"
+                  : "linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(245,246,250,0.26) 42%, rgba(15,16,20,0.52) 100%)",
             }}
           />
 
-          {/* ── HEADER (fades in once) ── */}
           <div
-            ref={headerRef}
             style={{
+              position: "absolute",
+              inset: 0,
               padding: isMobile
-                ? "104px 20px 0"
-                : isCompactDesktop
-                ? "36px clamp(20px, 4vw, 48px) 0"
-                : "clamp(48px, 8vh, 80px) clamp(24px, 6vw, 80px) 0",
-              transition: "opacity 0.9s ease, transform 0.9s ease",
-              opacity: headerInView ? 1 : 0,
-              transform: headerInView ? "translateY(0)" : "translateY(32px)",
+                ? "104px 14px 16px"
+                : "116px clamp(24px, 6vw, 80px) 24px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
             }}
           >
             <div
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                background: "rgba(232,25,44,0.1)",
-                border: "0.5px solid rgba(232,25,44,0.3)",
-                borderRadius: "100px",
-                padding: "6px 16px",
-                marginBottom: "20px",
+                width: "100%",
+                maxWidth: "760px",
               }}
             >
-              <span
-                style={{
-                  width: "6px", height: "6px",
-                  borderRadius: "50%",
-                  background: "#E8192C",
-                  display: "inline-block",
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: "11px",
-                  fontWeight: 500,
-                  color: "#E8192C",
-                  letterSpacing: "2px",
-                  textTransform: "uppercase",
-                }}
-              >
-                About LM Advertising
-              </span>
-            </div>
-
-            <h2
-              style={{
-                fontFamily: "'Syne', sans-serif",
-                fontSize: "clamp(2.1rem, 5vw, 4rem)",
-                fontWeight: 800,
-                lineHeight: 1.05,
-                letterSpacing: "-1.5px",
-                color: "#FAFAFA",
-                maxWidth: "520px",
-              }}
-            >
-              A Vision That{" "}
-              <span style={{ color: "#E8192C" }}>Builds Brands</span>
-            </h2>
-          </div>
-
-          {/* ── MAIN CONTENT GRID ── */}
-          <div
-            style={{
-              flex: 1,
-              display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-              gap: isCompactDesktop ? "clamp(16px, 2vw, 28px)" : "clamp(24px, 4vw, 60px)",
-              padding: isMobile
-                ? "20px 20px 28px"
-                : isCompactDesktop
-                ? "16px clamp(20px, 4vw, 48px)"
-                : "clamp(24px, 4vh, 40px) clamp(24px, 6vw, 80px)",
-              alignItems: "center",
-              minHeight: 0,
-            }}
-          >
-            {/* ── LEFT: Scroll-driven image ── */}
-            <div
-              style={{
-                position: "relative",
-                height: isMobile
-                  ? "clamp(260px, 46vh, 380px)"
-                  : isCompactDesktop
-                  ? "clamp(250px, 42vh, 410px)"
-                  : "clamp(320px, 50vh, 520px)",
-                borderRadius: "20px",
-                overflow: "hidden",
-                flexShrink: 0,
-              }}
-            >
-              <div className="noise-overlay" />
-
-              {IMAGES.map((img, i) => (
-                <div
-                  key={i}
-                  className={`about-img-slide ${i === activeImg ? "active" : "inactive"}`}
-                  style={isMobile && i !== activeImg ? { display: "none" } : undefined}
-                >
-                  <img
-                    src={img.src}
-                    alt={img.label}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      objectPosition: "center",
-                    }}
-                  />
-                  {/* Dark overlay */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background:
-                        "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)",
-                    }}
-                  />
-                </div>
-              ))}
-
-              {/* Image label at bottom */}
               <div
                 style={{
-                  position: "absolute",
-                  bottom: "20px",
-                  left: "20px",
-                  right: "20px",
-                  zIndex: 10,
-                  display: "flex",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  borderRadius: "999px",
+                  padding: "8px 14px",
+                  border: isDark
+                    ? "1px solid rgba(255,255,255,0.24)"
+                    : "1px solid rgba(17,17,20,0.2)",
+                  background: isDark
+                    ? "rgba(255,255,255,0.10)"
+                    : "rgba(255,255,255,0.52)",
+                  backdropFilter: "blur(8px)",
                 }}
               >
-                <div>
-                  <div
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "11px",
-                      color: "rgba(255,255,255,0.5)",
-                      letterSpacing: "2px",
-                      textTransform: "uppercase",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {IMAGES[activeImg].year}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'Syne', sans-serif",
-                      fontSize: "16px",
-                      fontWeight: 700,
-                      color: "#FAFAFA",
-                    }}
-                  >
-                    {IMAGES[activeImg].label}
-                  </div>
-                </div>
-
-                {/* Dot indicators */}
-                <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                  {IMAGES.map((_, i) => (
-                    <div
-                      key={i}
-                      className={`img-dot ${i === activeImg ? "active" : ""}`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Red left border accent */}
-              <div
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  top: "20%",
-                  bottom: "20%",
-                  width: "3px",
-                  background: "#E8192C",
-                  borderRadius: "0 3px 3px 0",
-                  zIndex: 10,
-                }}
-              />
-            </div>
-
-            {/* ── RIGHT: Scroll-driven paragraphs ── */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: isCompactDesktop ? "clamp(10px, 1.3vh, 16px)" : "clamp(14px, 2.5vh, 24px)",
-                minHeight: 0,
-                justifyContent: "center",
-              }}
-            >
-              {PARAGRAPHS.map((p, i) => (
-                <div
-                  key={i}
-                  className={`para-block ${isMobile || i === activePara ? "active" : "inactive"}`}
+                <span
                   style={{
-                    borderLeft: `2px solid ${
-                      isMobile || i === activePara ? "#E8192C" : "rgba(255,255,255,0.07)"
-                    }`,
-                    paddingLeft: isCompactDesktop ? "14px" : "20px",
-                    transition:
-                      "opacity 0.5s ease, transform 0.5s ease, border-color 0.4s ease",
-                    transitionDelay: `${i * 0.04}s`,
+                    width: "7px",
+                    height: "7px",
+                    borderRadius: "999px",
+                    background: "#E8192C",
+                  }}
+                />
+                <span
+                  style={{
+                    color: isDark ? "rgba(255,255,255,0.92)" : "rgba(17,17,20,0.88)",
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    letterSpacing: "2px",
+                    textTransform: "uppercase",
                   }}
                 >
-                  <div
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "10px",
-                      fontWeight: 500,
-                      color:
-                        isMobile || i === activePara
-                          ? "#E8192C"
-                          : "rgba(255,255,255,0.25)",
-                      letterSpacing: "2.5px",
-                      textTransform: "uppercase",
-                      marginBottom: "6px",
-                      transition: "color 0.5s ease",
-                    }}
-                  >
-                    {p.eyebrow}
-                  </div>
+                  About LM Advertising
+                </span>
+              </div>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`text-${activeStep}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  style={{
+                    marginTop: "14px",
+                    background: isDark ? "rgba(7,9,14,0.42)" : "rgba(255,255,255,0.58)",
+                    border: isDark
+                      ? "1px solid rgba(255,255,255,0.18)"
+                      : "1px solid rgba(17,17,20,0.12)",
+                    borderRadius: "18px",
+                    padding: isMobile ? "14px" : "20px 22px",
+                    backdropFilter: "blur(12px)",
+                  }}
+                >
                   <p
                     style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: isCompactDesktop
-                        ? "clamp(12px, 1vw, 13px)"
-                        : "clamp(13px, 1.4vw, 15px)",
-                      fontWeight: isMobile || i === activePara ? 400 : 300,
-                      lineHeight: isCompactDesktop ? 1.55 : 1.7,
-                      color:
-                        isMobile || i === activePara
-                          ? "rgba(255,255,255,0.85)"
-                          : "rgba(255,255,255,0.3)",
                       margin: 0,
-                      transition: "color 0.4s ease, font-weight 0.4s ease",
+                      color: "#FF7A86",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontWeight: 600,
+                      letterSpacing: "2.2px",
+                      textTransform: "uppercase",
+                      fontSize: "11px",
                     }}
                   >
-                    {p.body}
+                    {STEPS[activeStep].eyebrow}
                   </p>
-                </div>
-              ))}
-
-              {/* CTA — visible when last para is active */}
-              <div
-                style={{
-                  marginTop: "8px",
-                  transition: "opacity 0.5s ease, transform 0.5s ease",
-                  opacity: isMobile || activePara === PARAGRAPHS.length - 1 ? 1 : 0,
-                  transform:
-                    isMobile || activePara === PARAGRAPHS.length - 1
-                      ? "translateY(0)"
-                      : "translateY(12px)",
-                }}
-              >
-                <button
-                  className="lm-cta"
-                  style={isCompactDesktop ? { padding: "11px 24px", fontSize: "12px" } : undefined}
-                >
-                  Start Your Project →
-                </button>
-              </div>
+                  <h2
+                    style={{
+                      margin: "10px 0 10px",
+                      color: isDark ? "#ffffff" : "#12131a",
+                      fontFamily: "'Syne', sans-serif",
+                      fontSize: "clamp(1.9rem, 5vw, 4.2rem)",
+                      lineHeight: 1.03,
+                      letterSpacing: "-1px",
+                      maxWidth: "650px",
+                    }}
+                  >
+                    {STEPS[activeStep].image.label}
+                  </h2>
+                  <p
+                    style={{
+                      margin: 0,
+                      color: isDark ? "rgba(255,255,255,0.9)" : "rgba(17,17,20,0.86)",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: "clamp(14px, 1.5vw, 18px)",
+                      lineHeight: 1.75,
+                      maxWidth: "680px",
+                    }}
+                  >
+                    {STEPS[activeStep].body}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </div>
-
-          {/* ── STATS STRIP ── */}
-          <div
-            ref={statsRef}
-            style={{
-              borderTop: "0.5px solid rgba(255,255,255,0.06)",
-              padding: isMobile
-                ? "20px 20px 28px"
-                : isCompactDesktop
-                ? "10px clamp(20px, 4vw, 48px) 14px"
-                : "clamp(16px, 3vh, 28px) clamp(24px, 6vw, 80px)",
-              display: "flex",
-              gap: isCompactDesktop ? "clamp(18px, 3vw, 38px)" : "clamp(32px, 6vw, 80px)",
-              alignItems: "center",
-              flexWrap: isMobile ? "wrap" : "nowrap",
-            }}
-          >
-            {STATS.map((s, i) => (
-              <div
-                key={i}
-                style={{ transitionDelay: `${0.1 + i * 0.12}s` }}
-              >
-                <AnimatedStat {...s} inView={statsInView} />
-              </div>
-            ))}
 
             <div
               style={{
-                marginLeft: isMobile ? 0 : "auto",
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: "11px",
-                color: "rgba(255,255,255,0.2)",
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-                transition: "opacity 0.8s ease 0.5s",
-                opacity: statsInView ? 1 : 0,
-                width: isMobile ? "100%" : "auto",
+                display: "grid",
+                gap: isMobile ? "10px" : "12px",
+                gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))",
+                alignItems: "end",
               }}
             >
-              {isMobile ? "LM Advertising" : "Scroll to explore ↓"}
+              <div
+                style={{
+                  gridColumn: isMobile ? "1 / -1" : "1 / -1",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "2px",
+                }}
+              >
+                {STEPS.map((_, i) => (
+                  <motion.span
+                    key={`progress-${i}`}
+                    animate={{
+                      width: i === activeStep ? 28 : 8,
+                      opacity: i === activeStep ? 1 : 0.45,
+                      backgroundColor: i === activeStep ? "#E8192C" : isDark ? "#ffffff" : "#111111",
+                    }}
+                    transition={{ duration: 0.25 }}
+                    style={{
+                      height: "8px",
+                      borderRadius: "999px",
+                      display: "inline-block",
+                    }}
+                  />
+                ))}
+              </div>
+
+              {STATS.map((item) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{ duration: 0.5 }}
+                  style={{
+                    borderRadius: "14px",
+                    border: isDark
+                      ? "1px solid rgba(255,255,255,0.2)"
+                      : "1px solid rgba(17,17,20,0.14)",
+                    background: isDark ? "rgba(8,10,16,0.5)" : "rgba(255,255,255,0.54)",
+                    backdropFilter: "blur(8px)",
+                    padding: isMobile ? "10px 12px" : "12px 14px",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      color: isDark ? "#ffffff" : "#111319",
+                      fontFamily: "'Syne', sans-serif",
+                      fontSize: "clamp(1.35rem, 2.2vw, 2rem)",
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {item.value}
+                  </p>
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      color: isDark ? "rgba(255,255,255,0.72)" : "rgba(17,17,20,0.65)",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: "10px",
+                      letterSpacing: "1.6px",
+                      textTransform: "uppercase",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {item.label}
+                  </p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
+        
+      </section>
+      <section
+        style={{
+          padding: isMobile ? "42px 14px 56px" : "72px clamp(24px, 6vw, 80px) 96px",
+          background: isDark ? "#0b0d12" : "#ffffff",
+          borderTop: isDark
+            ? "1px solid rgba(255,255,255,0.08)"
+            : "1px solid rgba(17,17,20,0.08)",
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
+          style={{
+            maxWidth: "1120px",
+            margin: "0 auto",
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "minmax(270px, 0.85fr) minmax(360px, 1.15fr)",
+            gap: isMobile ? "16px" : "24px",
+            alignItems: "stretch",
+          }}
+        >
+          <div
+            style={{
+              borderRadius: "18px",
+              overflow: "hidden",
+              minHeight: isMobile ? "280px" : "360px",
+              boxShadow: "0 14px 36px rgba(0,0,0,0.16)",
+            }}
+          >
+            <img
+              src={CEO_PROFILE.image}
+              alt={CEO_PROFILE.name}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              borderRadius: "18px",
+              padding: isMobile ? "16px" : "22px 24px",
+              border: isDark
+                ? "1px solid rgba(255,255,255,0.16)"
+                : "1px solid rgba(17,17,20,0.12)",
+              background: isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.68)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "11px",
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+                color: "#E8192C",
+                fontWeight: 700,
+              }}
+            >
+              Know Your CEO
+            </p>
+            <h3
+              style={{
+                margin: "8px 0 6px",
+                fontFamily: "'Syne', sans-serif",
+                fontSize: "clamp(1.5rem, 3vw, 2.3rem)",
+                lineHeight: 1.08,
+                letterSpacing: "-0.5px",
+                color: isDark ? "#ffffff" : "#111319",
+              }}
+            >
+              {CEO_PROFILE.name}
+            </h3>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "13px",
+                letterSpacing: "0.4px",
+                color: isDark ? "rgba(255,255,255,0.8)" : "rgba(17,17,20,0.72)",
+              }}
+            >
+              {CEO_PROFILE.role}
+            </p>
+
+            <p
+              style={{
+                margin: "16px 0 0",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "clamp(14px, 1.25vw, 16px)",
+                lineHeight: 1.8,
+                color: isDark ? "rgba(255,255,255,0.88)" : "rgba(17,17,20,0.86)",
+              }}
+            >
+              {CEO_PROFILE.message}
+            </p>
+          </div>
+        </motion.div>
       </section>
     </>
   );
