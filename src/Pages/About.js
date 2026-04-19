@@ -308,10 +308,10 @@ const About = () => {
         }}
       >
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.55, ease: "easeOut" }}
+          transition={{ duration: 0.65, ease: "easeOut" }}
           style={{
             maxWidth: "1120px",
             margin: "0 auto",
@@ -321,27 +321,60 @@ const About = () => {
             alignItems: "stretch",
           }}
         >
-          <div
+          <motion.div
+            initial={{ opacity: 0, x: -24, scale: 0.97 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            whileHover={{ scale: 1.015 }}
             style={{
+              position: "relative",
               borderRadius: "18px",
               overflow: "hidden",
               minHeight: isMobile ? "280px" : "360px",
               boxShadow: "0 14px 36px rgba(0,0,0,0.16)",
             }}
           >
-            <img
+            <motion.div
+              animate={{
+                opacity: [0.35, 0.6, 0.35],
+                scale: [1, 1.06, 1],
+              }}
+              transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                position: "absolute",
+                width: "48%",
+                height: "48%",
+                right: "-10%",
+                top: "-12%",
+                borderRadius: "999px",
+                background: "radial-gradient(circle, rgba(232,25,44,0.32), rgba(232,25,44,0))",
+                pointerEvents: "none",
+              }}
+            />
+            <motion.img
               src={CEO_PROFILE.image}
               alt={CEO_PROFILE.name}
+              initial={{ scale: 1.08, opacity: 0.4 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+              whileHover={{ scale: 1.03 }}
               style={{
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
               }}
             />
-          </div>
+          </motion.div>
 
-          <div
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.7, ease: "easeOut", delay: 0.08 }}
             style={{
+              position: "relative",
               borderRadius: "18px",
               padding: isMobile ? "16px" : "22px 24px",
               border: isDark
@@ -351,7 +384,30 @@ const About = () => {
               backdropFilter: "blur(8px)",
             }}
           >
-            <p
+            <motion.span
+              aria-hidden="true"
+              initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+              whileInView={{ opacity: 0.18, scale: 1, rotate: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+              style={{
+                position: "absolute",
+                right: isMobile ? "12px" : "18px",
+                top: isMobile ? "4px" : "8px",
+                fontFamily: "'Syne', sans-serif",
+                fontSize: isMobile ? "58px" : "76px",
+                color: "#E8192C",
+                lineHeight: 1,
+                pointerEvents: "none",
+              }}
+            >
+              "
+            </motion.span>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.45, ease: "easeOut", delay: 0.12 }}
               style={{
                 margin: 0,
                 fontFamily: "'DM Sans', sans-serif",
@@ -363,8 +419,12 @@ const About = () => {
               }}
             >
               Know Your CEO
-            </p>
-            <h3
+            </motion.p>
+            <motion.h3
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.48, ease: "easeOut", delay: 0.18 }}
               style={{
                 margin: "8px 0 6px",
                 fontFamily: "'Syne', sans-serif",
@@ -375,8 +435,12 @@ const About = () => {
               }}
             >
               {CEO_PROFILE.name}
-            </h3>
-            <p
+            </motion.h3>
+            <motion.p
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.48, ease: "easeOut", delay: 0.24 }}
               style={{
                 margin: 0,
                 fontFamily: "'DM Sans', sans-serif",
@@ -386,9 +450,13 @@ const About = () => {
               }}
             >
               {CEO_PROFILE.role}
-            </p>
+            </motion.p>
 
-            <p
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.55, ease: "easeOut", delay: 0.3 }}
               style={{
                 margin: "16px 0 0",
                 fontFamily: "'DM Sans', sans-serif",
@@ -398,8 +466,8 @@ const About = () => {
               }}
             >
               {CEO_PROFILE.message}
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
         </motion.div>
       </section>
     </>

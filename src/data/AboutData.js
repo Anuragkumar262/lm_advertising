@@ -1,3 +1,5 @@
+const CEO_IMAGE = new URL("../../public/images/ceo-Imadvertising.jpg", import.meta.url).href;
+
 const PARAGRAPHS = [
   {
     eyebrow: "Who We Are",
@@ -43,9 +45,23 @@ const IMAGES = [
 const CEO_PROFILE = {
   name: "Mr. Abhishek Arya",
   role: "Founder & CEO, LM Advertising",
-  image: "",
-  message:
-    "At LM Advertising, we turn brand ambition into visible growth. Our focus is clear strategy, consistent creative quality, and execution that builds long-term trust with every campaign.",
+  image: CEO_IMAGE,
+  message: <p>
+
+    At LM ADVERTISING, our goal has always been simple — to create
+    meaningful and impactful advertising that helps brands grow and
+    connect with people. What started as a small idea has today become
+    a trusted name in branding, designing, printing & outdoor advertising
+    across Prayagraj.<br></br><br></br>
+    I believe that creativity backed by purpose can change how
+    businesses communicate. We don’t just make ads — we build
+    identities, tell stories and turn ideas into results. Our team works with
+    dedication, honesty and a passion for excellence in every project we
+    do. We are here to support our clients with fresh ideas, reliable
+    services and long term partnerships.<br></br><br></br>
+    Thank you for trusting LM ADVERTISING. We look forward to growing
+    with you and helping your brand make a lasting impression.,
+  </p>
 };
 
 export {PARAGRAPHS,IMAGES,CEO_PROFILE};

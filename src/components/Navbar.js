@@ -1,8 +1,10 @@
+import { FileText } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { Menu, Moon, Sun, X } from "lucide-react";
 
 const logo = new URL("../../public/logo.png", import.meta.url).href;
+const DESKTOP_BREAKPOINT = 1024;
 
 const Navbar = ({ theme = "light", onToggleTheme }) => {
   // Controls navbar visibility on scroll
@@ -20,8 +22,10 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
   const menuItems = [
     { label: "Home", to: "/" },
     { label: "About", to: "/about" },
-    { label: "Contact", to: "/contact" },
-    { label: "Connect", to: "/connect" },
+    { label: "Products", to: "/our-products" },
+    { label: "Our Clients", to: "/our-clients" },
+    { label: "Locations", to: "/our-locations" },
+    { label: "Reach Us", to: "/reach-us" },
   ];
 
   // Show navbar when scrolling up, hide when scrolling down
@@ -29,7 +33,7 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
   useEffect(() => {
     const controlNavbar = () => {
       const currentY = window.scrollY;
-      const isDesktop = window.innerWidth >= 768;
+      const isDesktop = window.innerWidth >= DESKTOP_BREAKPOINT;
 
       if (!isDesktop) {
         setShow(true);
@@ -53,16 +57,18 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
   // Ensure menu closes when switching from mobile to desktop
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) setMenuOpen(false);
+      if (window.innerWidth >= DESKTOP_BREAKPOINT) setMenuOpen(false);
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  return (
+    const openPDF = () => {
+      window.open("https://drive.google.com/uc?export=view&id=1pv8hcb-948Z1QSsPNLd0d7q6fQVafVbX");
+    };
+    return (
     <div
-      className={`fixed top-0 left-0 right-0 z-50 flex justify-center px-3 sm:px-4 md:px-0 pointer-events-none transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 flex justify-center px-3 sm:px-4 lg:px-0 pointer-events-none transition-all duration-500 ${
         show ? "translate-y-4 opacity-100" : "-translate-y-full opacity-0"
       }`}
     >
@@ -70,7 +76,7 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
       <nav
         className={`
         pointer-events-auto relative flex items-center justify-between
-        w-full max-w-[520px] md:max-w-none md:w-[80%] md:max-w-[1200px] px-3 sm:px-4 md:px-6 py-2.5 md:py-3
+        w-full max-w-[520px] lg:max-w-none lg:w-[95%] lg:max-w-[1200px] px-3 sm:px-4 lg:px-6 py-2.5 lg:py-3
         ${theme === "dark" ? "bg-black/60 border-white/15" : "bg-white/70 border-gray-200/50"}
         backdrop-blur-xl
         rounded-full shadow-[0_8px_25px_rgba(0,0,0,0.08)]
@@ -80,9 +86,9 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-500/5 via-transparent to-red-500/5 blur-xl pointer-events-none"></div>
 
         {/* ================= LOGO ================= */}
-        <h1 className={`relative flex items-center gap-1.5 md:gap-3 font-semibold tracking-wide text-xs sm:text-sm md:text-base ${theme === "dark" ? "text-white" : "text-black"}`}>
+        <h1 className={`relative flex items-center gap-1.5 lg:gap-3 font-semibold tracking-wide text-xs sm:text-sm lg:text-base ${theme === "dark" ? "text-white" : "text-black"}`}>
           <span className="flex items-center justify-center rounded-full p-1 shadow-sm">
-            <img src={logo} alt="logo" className="h-7 w-7 md:h-8 md:w-8" />
+            <img src={logo} alt="logo" className="h-7 w-7 lg:h-8 lg:w-8" />
           </span>
 
           {/* Brand Name */}
@@ -97,7 +103,7 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
         </h1>
 
         {/* ================= DESKTOP MENU ================= */}
-        <ul className="relative hidden md:flex items-center gap-6 text-sm font-medium">
+        <ul className="relative hidden lg:flex items-center gap-6 text-sm font-medium">
           {menuItems.map((item) => (
             <li key={item.label} className="relative px-3 py-1 group">
               
@@ -127,7 +133,7 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
         </ul>
 
         {/* ================= CTA BUTTON ================= */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-2">
           <button
             type="button"
             onClick={onToggleTheme}
@@ -146,18 +152,18 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
             bg-red-500 hover:bg-red-600
             text-white
             px-5 py-2 rounded-full
-            text-xs md:text-sm font-semibold
+            text-xs lg:text-sm font-semibold
             transition transform hover:scale-105
             shadow-sm hover:shadow-md
           "
           >
-            Get a Quote
+            <FileText onClick={openPDF}/>
           </button>
         </div>
 
         {/* ================= MOBILE TOGGLE ================= */}
         <button
-          className={`md:hidden p-1.5 ${theme === "dark" ? "text-white" : "text-black"}`}
+          className={`lg:hidden p-1.5 ${theme === "dark" ? "text-white" : "text-black"}`}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
@@ -171,11 +177,11 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
       <div
         id="mobile-menu"
         className={`
-        pointer-events-auto absolute top-[84px] left-3 right-3 sm:left-4 sm:right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 w-auto md:w-[80%] md:max-w-[1200px]
+        pointer-events-auto absolute top-[84px] left-3 right-3 sm:left-4 sm:right-4 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 w-auto lg:w-[80%] lg:max-w-[1200px]
         ${theme === "dark" ? "bg-black/75 border-white/15" : "bg-white/80 border-gray-200/50"}
         backdrop-blur-xl
         rounded-2xl p-5
-        flex flex-col gap-4 md:hidden
+        flex flex-col gap-4 lg:hidden
         shadow-[0_8px_25px_rgba(0,0,0,0.08)]
         origin-top transition-all duration-300
         ${
@@ -216,7 +222,7 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
 
         {/* Mobile CTA */}
         <button className="mt-4 bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full text-sm font-semibold">
-          Get a Quote
+          Download Broshure
         </button>
       </div>
     </div>
