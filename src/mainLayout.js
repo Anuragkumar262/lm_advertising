@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
 import Navbar from "./components/Navbar";
 
+
 const MainLayout = () => {
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "light";
