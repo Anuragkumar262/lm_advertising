@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { 
   ArrowRight, PhoneCall, MonitorPlay, Target, 
@@ -6,6 +6,8 @@ import {
   Printer, TrendingUp, Presentation, Image as ImageIcon,
   Quote, Building
 } from "lucide-react";
+import { useNavigate } from "react-router"; // Agar react-router-dom use kar rahe hain toh wahan se
+const CEO_IMAGE = new URL("/public/images/ceo-Imadvertising.jpg", import.meta.url).href;
 
 const InstagramIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>;
 const FacebookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>;
@@ -30,6 +32,16 @@ const staggerContainer = {
 
 const Home = () => {
   const [stats, setStats] = useState({ projects: 0, experience: 0, retention: 0 });
+  const navigate = useNavigate();
+  const ctaRef = useRef(null); // CTA section ke liye reference banayein
+  const servicesRef = useRef(null);
+  const scrollToServices = () => {
+    servicesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  const scrollToCTA = () => {
+    ctaRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
     // Simple count-up animation for stats
@@ -73,10 +85,10 @@ const Home = () => {
               We bring ideas to life through creativity, strategy & smart design. Experts in branding, printing & outdoor advertising solutions.
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
-              <button className="px-8 py-4 bg-[#FF3B3B] text-white rounded-xl font-bold hover:bg-[#e03131] hover:scale-105 hover:shadow-[0_0_20px_rgba(255,59,59,0.4)] transition-all duration-300 flex items-center gap-2 cursor-pointer">
+              <button onClick={scrollToServices} className="px-8 py-4 bg-[#FF3B3B] text-white rounded-xl font-bold hover:bg-[#e03131] hover:scale-105 hover:shadow-[0_0_20px_rgba(255,59,59,0.4)] transition-all duration-300 flex items-center gap-2 cursor-pointer">
                 Explore Services <ArrowRight size={20} />
               </button>
-              <button className="px-8 py-4 border-2 border-[var(--text-primary)] text-[var(--text-primary)] rounded-xl font-bold hover:bg-[var(--text-primary)] hover:text-[var(--app-bg)] transition-all duration-300 cursor-pointer">
+              <button onClick={scrollToCTA} className="px-8 py-4 border-2 border-[var(--text-primary)] text-[var(--text-primary)] rounded-xl font-bold hover:bg-[var(--text-primary)] hover:text-[var(--app-bg)] transition-all duration-300 cursor-pointer">
                 Contact Us
               </button>
             </motion.div>
@@ -145,8 +157,8 @@ const Home = () => {
       </section>
 
       {/* 3. SERVICES SECTION */}
-      <section className="w-full max-w-7xl px-6 lg:px-20 py-20">
-        <div className="text-center mb-16">
+      <section ref={servicesRef} className=" w-full max-w-7xl px-6 lg:px-20 py-20 ">
+        <div className="text-center mb-16 ">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">Our Premium <span className="text-[#FF3B3B]">Services</span></h2>
             <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-lg">Comprehensive outdoor advertising and branding solutions to maximize your visibility.</p>
         </div>
@@ -181,8 +193,8 @@ const Home = () => {
       </section>
 
       {/* 4. ABOUT / STORY SECTION */}
-      <section className="relative w-full py-24 overflow-hidden bg-[var(--text-primary)] text-[var(--app-bg)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-20 grid lg:grid-cols-2 gap-16 items-center">
+      <section className="relative w-full py-24 overflow-hidden bg-[var(--app-bg)] text-[var(--text-primary)] bg-gradient-to-tr from-[#FF3B3B]/20 to-transparent ">
+        <div className="max-w-7xl mx-auto px-6 lg:px-20 grid lg:grid-cols-2 gap-16 items-center ">
             <motion.div 
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -212,7 +224,7 @@ const Home = () => {
                     Our approach combines strategic locations, bold design, and flawless execution to ensure your message doesn't just reach the masses, it resonates with them.
                 </p>
                 <div className="pt-4">
-                    <button className="flex items-center gap-2 font-bold text-[#FF3B3B] hover:text-white transition-colors cursor-pointer">
+                    <button onClick={() => navigate("/about")} className="flex items-center gap-2 font-bold text-[#FF3B3B] hover:text-white transition-colors cursor-pointer">
                         Read Our Full Story <ArrowRight size={20} />
                     </button>
                 </div>
@@ -221,7 +233,7 @@ const Home = () => {
       </section>
 
       {/* 5. USP SECTION */}
-      <section className="w-full max-w-7xl px-6 lg:px-20 py-24">
+      <section className="w-full max-w-7xl px-6 lg:px-20 py-24 ">
         <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Us</h2>
         </div>
@@ -263,15 +275,15 @@ const Home = () => {
             >
                 <Quote className="absolute top-8 left-8 w-12 h-12 text-[#FF3B3B]/20 rotate-180" />
                 <Quote className="absolute bottom-8 right-8 w-12 h-12 text-[#FF3B3B]/20" />
-                
-                <img src="/images/ceo-Imadvertising.jpg" alt="CEO" className="w-24 h-24 rounded-full object-cover border-4 border-[#FF3B3B] mx-auto mb-8 shadow-xl" />
-                
+
+                <img src={CEO_IMAGE} alt="CEO" className="w-30 h-30 rounded-full border-4 border-[#FF3B3B] mx-auto mb-8 shadow-xl p-1" />
+
                 <p className="text-xl md:text-2xl font-medium leading-relaxed italic mb-8">
                     "Creativity backed by purpose can change how businesses communicate. Our vision is to elevate local and national brands through unmissable outdoor presence."
                 </p>
                 
                 <div>
-                    <h4 className="font-bold text-lg">Director / CEO</h4>
+                    <h4 className="font-bold text-lg"> CEO</h4>
                     <p className="text-[var(--text-secondary)] text-sm">LM Advertising</p>
                 </div>
             </motion.div>
@@ -299,7 +311,7 @@ const Home = () => {
       </section>
 
       {/* 8. FINAL CTA SECTION */}
-      <section className="w-full py-24 px-6 relative overflow-hidden">
+      <section ref={ctaRef} className="w-full py-24 px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[#FF3B3B]"></div>
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent blur-2xl"></div>
         
@@ -322,15 +334,17 @@ const Home = () => {
                 <button className="px-10 py-5 bg-white text-[#FF3B3B] rounded-xl font-bold text-lg hover:bg-gray-100 hover:scale-105 transition-all shadow-xl cursor-pointer">
                     Get Started
                 </button>
-                <button className="px-10 py-5 border-2 border-white text-white rounded-xl font-bold text-lg hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer">
-                    <PhoneCall size={20} /> Call Now
-                </button>
+                <a href="tel:+919876543210" className="block w-fit">
+                    <button className="px-10 py-5 border-2 border-white text-white rounded-xl font-bold text-lg hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer">
+                        <PhoneCall size={20} /> Call Now
+                    </button>
+                </a>
             </motion.div>
         </div>
       </section>
 
       {/* 9. FOOTER */}
-      <footer className="w-full bg-[var(--text-primary)] text-[var(--app-bg)] py-16 px-6 lg:px-20">
+      <footer className="w-full bg-[var(--app-bg)] text-[var(--text-primary)] py-16 px-6 lg:px-20">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-[var(--app-bg)]/10 pb-12">
             <div>
                 <h3 className="text-2xl font-black text-[#FF3B3B] mb-6">LM ADVERTISING</h3>
@@ -338,10 +352,9 @@ const Home = () => {
                     Premium outdoor advertising, branding, and printing solutions based in Prayagraj, UP.
                 </p>
                 <div className="flex gap-4">
-                    <a href="#" className="w-10 h-10 rounded-full bg-[var(--app-bg)]/10 flex items-center justify-center hover:bg-[#FF3B3B] transition-colors"><InstagramIcon /></a>
-                    <a href="#" className="w-10 h-10 rounded-full bg-[var(--app-bg)]/10 flex items-center justify-center hover:bg-[#FF3B3B] transition-colors"><FacebookIcon /></a>
-                    <a href="#" className="w-10 h-10 rounded-full bg-[var(--app-bg)]/10 flex items-center justify-center hover:bg-[#FF3B3B] transition-colors"><TwitterIcon /></a>
-                    <a href="#" className="w-10 h-10 rounded-full bg-[var(--app-bg)]/10 flex items-center justify-center hover:bg-[#FF3B3B] transition-colors"><LinkedinIcon /></a>
+                    <a href="https://www.instagram.com/lmadvertising.in/" className="w-10 h-10 rounded-full bg-[var(--app-bg)]/10 flex items-center justify-center hover:bg-[#FF3B3B] transition-colors"><InstagramIcon /></a>
+                    
+                    <a href="https://www.linkedin.com/company/lm-advertising-a-360-advertising-agency/" className="w-10 h-10 rounded-full bg-[var(--app-bg)]/10 flex items-center justify-center hover:bg-[#FF3B3B] transition-colors"><LinkedinIcon /></a>
                 </div>
             </div>
             
@@ -358,16 +371,16 @@ const Home = () => {
                 <h4 className="text-lg font-bold mb-6">Quick Links</h4>
                 <div className="flex flex-col gap-3 opacity-80">
                     <a href="#" className="hover:text-[#FF3B3B] transition-colors">Home</a>
-                    <a href="#" className="hover:text-[#FF3B3B] transition-colors">About Us</a>
-                    <a href="#" className="hover:text-[#FF3B3B] transition-colors">Our Services</a>
-                    <a href="#" className="hover:text-[#FF3B3B] transition-colors">Portfolio</a>
-                    <a href="#" className="hover:text-[#FF3B3B] transition-colors">Reach Us</a>
+                    <a href="about" className="hover:text-[#FF3B3B] transition-colors">About Us</a>
+                    <a href="our-products" className="hover:text-[#FF3B3B] transition-colors">Our Services</a>
+                    <a href="our-clients" className="hover:text-[#FF3B3B] transition-colors">Portfolio</a>
+                    <a href="reach-us" className="hover:text-[#FF3B3B] transition-colors">Reach Us</a>
                 </div>
             </div>
         </div>
         <div className="max-w-7xl mx-auto pt-8 flex flex-col md:flex-row items-center justify-between opacity-50 text-sm">
             <p>&copy; {new Date().getFullYear()} LM Advertising. All rights reserved.</p>
-            <p>Designed with <span className="text-[#FF3B3B]">♥</span></p>
+            <p>Developed by DevKrafto Solutions <span className="text-[#FF3B3B]">♥</span></p>
         </div>
       </footer>
     </div>
