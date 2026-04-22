@@ -1,23 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --app-bg: #ffffff;
-  --app-radial-1: rgba(232, 25, 44, 0.08);
-  --app-radial-2: rgba(232, 25, 44, 0.06);
-  --text-primary: #0f1115;
+  --app-bg: #F5F6F8;
+  --app-radial-1: rgba(255, 59, 59, 0.08);
+  --app-radial-2: rgba(255, 59, 59, 0.03);
+  --text-primary: #0B0F14;
+  --text-secondary: #4b5563;
+  --app-card-bg: rgba(255, 255, 255, 0.6);
+  --app-card-border: rgba(0, 0, 0, 0.05);
 }
 
 [data-theme="dark"] {
-  --app-bg: #080a0f;
-  --app-radial-1: rgba(232, 25, 44, 0.16);
-  --app-radial-2: rgba(255, 255, 255, 0.06);
+  --app-bg: #0B0F14;
+  --app-radial-1: rgba(255, 59, 59, 0.15);
+  --app-radial-2: rgba(100, 100, 255, 0.05);
   --text-primary: #f7f8fb;
+  --text-secondary: #9ca3af;
+  --app-card-bg: rgba(255, 255, 255, 0.03);
+  --app-card-border: rgba(255, 255, 255, 0.05);
 }
 
 html,
 body,
 #root {
   background-color: var(--app-bg);
+  color: var(--text-primary);
   margin: 0;
   min-height: 100vh;
   width: 100%;
@@ -28,9 +35,16 @@ body {
   background: radial-gradient(circle at 90% 10%, var(--app-radial-1) 0%, transparent 45%),
     radial-gradient(circle at 10% 90%, var(--app-radial-2) 0%, transparent 40%),
     var(--app-bg);
-  transition: background-color 0.3s ease, background 0.3s ease;
+  transition: background-color 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+.glass-card {
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-card-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .about-img-slide {
   transition: opacity 1.2s ease, transform 1.2s ease;
-} 
+}

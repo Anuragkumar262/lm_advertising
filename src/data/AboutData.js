@@ -46,8 +46,9 @@ const CEO_PROFILE = {
   name: "Mr. Abhishek Arya",
   role: "Founder & CEO, LM Advertising",
   image: CEO_IMAGE,
-  message: 
-    <span>At LM ADVERTISING, our goal has always been simple — to create
+  message: <span>
+
+    At LM ADVERTISING, our goal has always been simple — to create
     meaningful and impactful advertising that helps brands grow and
     connect with people. What started as a small idea has today become
     a trusted name in branding, designing, printing & outdoor advertising
@@ -59,8 +60,8 @@ const CEO_PROFILE = {
     do. We are here to support our clients with fresh ideas, reliable
     services and long term partnerships.<br></br><br></br>
     Thank you for trusting LM ADVERTISING. We look forward to growing
-    with you and helping your brand make a lasting impression.
-    </span>
+    with you and helping your brand make a lasting impression.,
+  </span>
 };
 
 export {PARAGRAPHS,IMAGES,CEO_PROFILE};

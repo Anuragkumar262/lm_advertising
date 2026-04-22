@@ -87,8 +87,8 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
 
         {/* ================= LOGO ================= */}
         <h1 className={`relative flex items-center gap-1.5 lg:gap-3 font-semibold tracking-wide text-xs sm:text-sm lg:text-base ${theme === "dark" ? "text-white" : "text-black"}`}>
-          <span className="flex items-center justify-center rounded-full p-1 shadow-sm">
-            <img src={logo} alt="logo" className="h-7 w-7 lg:h-8 lg:w-8" />
+          <span className="flex items-center justify-center rounded-full p-1 shadow-sm bg-black/50">
+            <img src={logo} alt="logo" className="h-7 w-7 lg:h-7 lg:w-7  " />
           </span>
 
           {/* Brand Name */}
@@ -222,7 +222,7 @@ const Navbar = ({ theme = "light", onToggleTheme }) => {
 
         {/* Mobile CTA */}
         <button className="mt-4 bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full text-sm font-semibold">
-          Download Broshure
+          Download Brochure
         </button>
       </div>
     </div>
