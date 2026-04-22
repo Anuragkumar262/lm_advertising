@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
 import Navbar from "./components/Navbar";
+import WhatsAppBtn from "./components/WhatsAppBtn";
 
 const MainLayout = () => {
   const [theme, setTheme] = useState(() => {
+
     if (typeof window === "undefined") return "light";
+
     const savedTheme = localStorage.getItem("theme");
+
     if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
+    
     return window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
@@ -26,6 +31,7 @@ const MainLayout = () => {
     <>
       <Navbar theme={theme} onToggleTheme={toggleTheme} />
       <Outlet context={{ theme, toggleTheme }} />
+      <WhatsAppBtn></WhatsAppBtn>
     </>
   );
 };
